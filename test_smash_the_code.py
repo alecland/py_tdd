@@ -1,11 +1,8 @@
 #!/usr/bin/python
 
-from enum import IntEnum
 from smash_the_code import BlockNature
 from smash_the_code import Block
 from smash_the_code import Board
-import sys
-import math
 import unittest
 
 class TestBoardMethods(unittest.TestCase):
@@ -72,17 +69,16 @@ class TestBoardMethods(unittest.TestCase):
         self.assertEqual(BlockNature.BLUE, self.board.get_nature(11,2))
         self.assertEqual(BlockNature.EMPTY, self.board.get_nature(3,3))
     
-    def test_board_after_applying_gravity(self):
+    def test_board_gravity_candidate(self):
+        self.board.fill_with_rows(self.test_gravity)
+        candidates = self.board.get_col_gravity_candidates(2)
+        self.assertListEqual(candidates, [10, 3])
+
+    def test_board_versus_ref_after_applying_gravity(self):
         self.board.fill_with_rows(self.test_gravity)
         self.board.apply_gravity()
         board = Board()
         board.fill_with_rows(self.test_rows)
-        self.assertEqual(BlockNature.RED, self.board.get_nature(11,5))
-        self.assertEqual(BlockNature.YELLOW, self.board.get_nature(10,5))
-        self.assertEqual(BlockNature.GREEN, self.board.get_nature(7,4))
-        self.assertEqual(BlockNature.PURPLE, self.board.get_nature(9,4))
-        self.assertEqual(BlockNature.BLUE, self.board.get_nature(11,2))
-        self.assertEqual(BlockNature.EMPTY, self.board.get_nature(3,3))
         self.assertListEqual(board.grid, self.board.grid)
         
 

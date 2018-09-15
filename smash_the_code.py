@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 from enum import IntEnum
-import sys
-import math
+#import sys
+#import math
 
 class BlockNature(IntEnum):
     SKULL = 0
@@ -20,6 +20,9 @@ class Block:
     
     def __eq__(self, other):
         return self.nature == other.nature
+    
+    def is_empty(self):
+        return self.nature == BlockNature.EMPTY
 
 class Board:
     ROWS_NUMBER = 12
@@ -38,11 +41,19 @@ class Board:
     
     def apply_gravity(self):
         for col_idx in range(self.COLS_NUMBER):
-            should_fall = True
-            while(should_fall):
-                should_fall = False
-                for row_idx in range(self.ROWS_NUMBER - 1, 0, -1):
-                    if self.grid[row_idx][col_idx].nature == BlockNature.EMPTY and self.grid[row_idx - 1][col_idx].nature != BlockNature.EMPTY:
-                        should_fall = True
-                        self.grid[row_idx][col_idx].nature = self.grid[row_idx - 1][col_idx].nature
-                        self.grid[row_idx - 1][col_idx].nature = BlockNature.EMPTY
+            gravity_candidates = self.get_col_gravity_candidates(col_idx)
+            while(gravity_candidates[1] is not None):
+                self.grid[gravity_candidates[0]][col_idx].nature = self.grid[gravity_candidates[1]][col_idx].nature
+                self.grid[gravity_candidates[1]][col_idx].nature = BlockNature.EMPTY
+                gravity_candidates = self.get_col_gravity_candidates(col_idx)
+    
+    def get_col_gravity_candidates(self, col_idx):
+        empty_row_idx, not_empty_row_idx = None, None
+        for row_idx in range(self.ROWS_NUMBER - 1, 0, -1):
+            if empty_row_idx is None and self.grid[row_idx][col_idx].is_empty():
+                empty_row_idx = row_idx
+            elif not_empty_row_idx is None and empty_row_idx is not None and not self.grid[row_idx][col_idx].is_empty():
+                not_empty_row_idx = row_idx
+        return [empty_row_idx, not_empty_row_idx]
+    
+    
