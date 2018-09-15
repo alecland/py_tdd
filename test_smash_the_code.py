@@ -69,10 +69,12 @@ class TestBoardMethods(unittest.TestCase):
         self.assertEqual(BlockNature.BLUE, self.board.get_nature(11,2))
         self.assertEqual(BlockNature.EMPTY, self.board.get_nature(3,3))
     
-    def test_board_gravity_candidate(self):
+    def test_gravity_move_serach_on_second_col(self):
         self.board.fill_with_rows(self.test_gravity)
-        candidates = self.board.get_col_gravity_candidates(2)
-        self.assertListEqual(candidates, [10, 3])
+        move = self.board.get_col_gravity_move(2)
+        self.assertEqual(2, move.col_idx)
+        self.assertEqual(3, move.start_idx)
+        self.assertEqual(10, move.stop_idx)
 
     def test_board_versus_ref_after_applying_gravity(self):
         self.board.fill_with_rows(self.test_gravity)

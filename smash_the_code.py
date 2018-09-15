@@ -24,6 +24,12 @@ class Block:
     def is_empty(self):
         return self.nature == BlockNature.EMPTY
 
+class GravityMove:
+    def __init__(self, col_idx, start_idx, stop_idx):
+        self.col_idx = col_idx
+        self.start_idx = start_idx
+        self.stop_idx = stop_idx
+
 class Board:
     ROWS_NUMBER = 12
     COLS_NUMBER = 6
@@ -41,19 +47,22 @@ class Board:
     
     def apply_gravity(self):
         for col_idx in range(self.COLS_NUMBER):
-            gravity_candidates = self.get_col_gravity_candidates(col_idx)
-            while(gravity_candidates[1] is not None):
-                self.grid[gravity_candidates[0]][col_idx].nature = self.grid[gravity_candidates[1]][col_idx].nature
-                self.grid[gravity_candidates[1]][col_idx].nature = BlockNature.EMPTY
-                gravity_candidates = self.get_col_gravity_candidates(col_idx)
+            gravity_move = self.get_col_gravity_move(col_idx)
+            while(gravity_move.start_idx is not None):
+                self.make_block_fall(gravity_move)                
+                gravity_move = self.get_col_gravity_move(col_idx)
     
-    def get_col_gravity_candidates(self, col_idx):
-        empty_row_idx, not_empty_row_idx = None, None
+    def get_col_gravity_move(self, col_idx):
+        stop_idx, start_idx = None, None
         for row_idx in range(self.ROWS_NUMBER - 1, 0, -1):
-            if empty_row_idx is None and self.grid[row_idx][col_idx].is_empty():
-                empty_row_idx = row_idx
-            elif not_empty_row_idx is None and empty_row_idx is not None and not self.grid[row_idx][col_idx].is_empty():
-                not_empty_row_idx = row_idx
-        return [empty_row_idx, not_empty_row_idx]
+            if stop_idx is None and self.grid[row_idx][col_idx].is_empty():
+                stop_idx = row_idx
+            elif start_idx is None and stop_idx is not None and not self.grid[row_idx][col_idx].is_empty():
+                start_idx = row_idx
+        return GravityMove(col_idx, start_idx, stop_idx)
+    
+    def make_block_fall(self, gravity_move):
+        self.grid[gravity_move.stop_idx][gravity_move.col_idx].nature = self.grid[gravity_move.start_idx][gravity_move.col_idx].nature
+        self.grid[gravity_move.start_idx][gravity_move.col_idx].nature = BlockNature.EMPTY
     
     
