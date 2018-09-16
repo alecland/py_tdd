@@ -23,6 +23,9 @@ class Block:
     
     def is_empty(self):
         return self.nature == BlockNature.EMPTY
+    
+    def is_colored(self):
+        return self.nature >= BlockNature.BLUE
 
 class GravityMove:
     def __init__(self, col_idx, start_idx, stop_idx):
@@ -64,5 +67,19 @@ class Board:
     def make_block_fall(self, gravity_move):
         self.grid[gravity_move.stop_idx][gravity_move.col_idx].nature = self.grid[gravity_move.start_idx][gravity_move.col_idx].nature
         self.grid[gravity_move.start_idx][gravity_move.col_idx].nature = BlockNature.EMPTY
+    
+    def is_above_block_same_color(self, row_idx, col_idx):
+        return row_idx > 0 and self.grid[row_idx - 1][col_idx].nature == self.grid[row_idx][col_idx].nature
+
+    def is_below_block_same_color(self, row_idx, col_idx):
+        return row_idx < self.ROWS_NUMBER - 1 and self.grid[row_idx + 1][col_idx].nature == self.grid[row_idx][col_idx].nature
+    
+    def is_left_block_same_color(self, row_idx, col_idx):
+        return col_idx > 0 and self.grid[row_idx][col_idx - 1].nature == self.grid[row_idx][col_idx].nature
+    
+    def is_right_block_same_color(self, row_idx, col_idx):
+        return col_idx < self.COLS_NUMBER - 1 and self.grid[row_idx][col_idx + 1].nature == self.grid[row_idx][col_idx].nature
+
+
     
     

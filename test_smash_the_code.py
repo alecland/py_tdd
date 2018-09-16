@@ -23,7 +23,7 @@ class TestBoardMethods(unittest.TestCase):
                              '....45', 
                              '....35', 
                              '....4.', 
-                             '..1.54']
+                             '.11.54']
         self.test_rows = ['......',
                           '......', 
                           '......', 
@@ -35,7 +35,7 @@ class TestBoardMethods(unittest.TestCase):
                           '....45', 
                           '....35', 
                           '..2345', 
-                          '..1254']
+                          '.11254']
 
     def test_can_use_block_nature_as_int(self):
         self.assertEqual(0, BlockNature.SKULL)
@@ -50,6 +50,8 @@ class TestBoardMethods(unittest.TestCase):
         block = Block(BlockNature.GREEN)
         self.assertEqual(block.nature, BlockNature.GREEN)
         self.assertFalse(block.is_checked)
+        self.assertTrue(block.is_colored())
+        self.assertFalse(block.is_empty())
 
     def test_new_board_is_12x6(self):
         self.assertEqual(len(self.board.grid), self.ROWS_NUMBER)
@@ -82,6 +84,13 @@ class TestBoardMethods(unittest.TestCase):
         board = Board()
         board.fill_with_rows(self.test_rows)
         self.assertListEqual(board.grid, self.board.grid)
+    
+    def test_left_block_same_color(self):
+        self.board.fill_with_rows(self.test_rows)
+        self.assertTrue(self.board.is_left_block_same_color(11, 2))
+        self.assertFalse(self.board.is_left_block_same_color(7, 0))
+        self.assertFalse(self.board.is_left_block_same_color(11, 1))
+        self.assertFalse(self.board.is_left_block_same_color(11, 5))
         
 
 if __name__ == '__main__':
