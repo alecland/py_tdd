@@ -58,9 +58,7 @@ class TestBoardMethods(unittest.TestCase):
         self.assertEqual(len(self.board.grid[self.ROWS_NUMBER - 1]), self.COLS_NUMBER)
     
     def test_new_board_is_empty(self):
-        for row_idx in range(self.ROWS_NUMBER):
-            for col_idx in range(self.COLS_NUMBER):
-                self.assertEqual(self.board.get_nature(row_idx, col_idx), BlockNature.EMPTY)
+        self.assertTrue(self.board.is_empty())
     
     def test_board_fill_should_set_board(self):
         self.board.fill_with_rows(self.test_rows)
@@ -91,6 +89,13 @@ class TestBoardMethods(unittest.TestCase):
         self.assertFalse(self.board.is_left_block_same_color(7, 0))
         self.assertFalse(self.board.is_left_block_same_color(11, 1))
         self.assertFalse(self.board.is_left_block_same_color(11, 5))
+    
+    def test_block_chain_length(self):
+        self.board.fill_with_rows(self.test_rows)
+        self.assertEqual(0, self.board.search_chain_length(1, 1))
+        self.assertEqual(1, self.board.search_chain_length(6, 4))
+        self.assertEqual(2, self.board.search_chain_length(11, 1))
+        self.assertEqual(3, self.board.search_chain_length(10, 5))
         
 
 if __name__ == '__main__':

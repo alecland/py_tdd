@@ -40,6 +40,13 @@ class Board:
     def __init__(self):
         self.grid = [[Block(BlockNature.EMPTY) for col_idx in range(self.COLS_NUMBER)] for row_idx in range(self.ROWS_NUMBER)]
     
+    def is_empty(self):
+        for row_idx in range(self.ROWS_NUMBER):
+            for col_idx in range(self.COLS_NUMBER):
+                if self.grid[row_idx][col_idx].nature != BlockNature.EMPTY:
+                    return False
+        return True
+
     def get_nature(self, row_idx, col_idx):
         return self.grid[row_idx][col_idx].nature
     
@@ -79,6 +86,33 @@ class Board:
     
     def is_right_block_same_color(self, row_idx, col_idx):
         return col_idx < self.COLS_NUMBER - 1 and self.grid[row_idx][col_idx + 1].nature == self.grid[row_idx][col_idx].nature
+    
+    def is_search_necessary(self, row_idx, col_idx):
+        is_necessary = True
+        if self.grid[row_idx][col_idx].is_checked or not self.grid[row_idx][col_idx].is_colored():
+            is_necessary = False
+            
+        self.grid[row_idx][col_idx].is_checked = True
+        return is_necessary
+
+    def search_chain_length(self, row_idx, col_idx):
+        if not self.is_search_necessary(row_idx, col_idx):
+            return 0
+               
+        chain_length = 1
+        if self.is_below_block_same_color(row_idx, col_idx):
+            chain_length += self.search_chain_length(row_idx + 1, col_idx)
+        if self.is_above_block_same_color(row_idx, col_idx):
+            chain_length += self.search_chain_length(row_idx - 1, col_idx)
+        if self.is_left_block_same_color(row_idx, col_idx):
+            chain_length += self.search_chain_length(row_idx, col_idx - 1)
+        if self.is_right_block_same_color(row_idx, col_idx):
+            chain_length += self.search_chain_length(row_idx, col_idx + 1)
+
+        return chain_length
+
+        
+
 
 
     
