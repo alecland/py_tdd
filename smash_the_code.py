@@ -26,6 +26,12 @@ class Block:
     
     def is_colored(self):
         return self.nature >= BlockNature.BLUE
+    
+    def check(self):
+        self.is_checked = True
+    
+    def uncheck(self):
+        self.is_checked = False
 
 class GravityMove:
     def __init__(self, col_idx, start_idx, stop_idx):
@@ -50,6 +56,12 @@ class Board:
     def get_nature(self, row_idx, col_idx):
         return self.grid[row_idx][col_idx].nature
     
+    def get_rows_count(self):
+        return len(self.grid)
+    
+    def get_cols_count(self):
+        return len(self.grid[self.get_rows_count() - 1])
+
     def fill_with_rows(self, rows):
         for row_idx, row in enumerate(rows):
             for col_idx in range(len(row)):
@@ -75,17 +87,17 @@ class Board:
         self.grid[gravity_move.stop_idx][gravity_move.col_idx].nature = self.grid[gravity_move.start_idx][gravity_move.col_idx].nature
         self.grid[gravity_move.start_idx][gravity_move.col_idx].nature = BlockNature.EMPTY
     
-    def is_above_block_same_color(self, row_idx, col_idx):
-        return row_idx > 0 and self.grid[row_idx - 1][col_idx].nature == self.grid[row_idx][col_idx].nature
+    def is_above_block_of_nature(self, row_idx, col_idx, nature):
+        return row_idx > 0 and self.grid[row_idx - 1][col_idx].nature == nature
 
-    def is_below_block_same_color(self, row_idx, col_idx):
-        return row_idx < self.ROWS_NUMBER - 1 and self.grid[row_idx + 1][col_idx].nature == self.grid[row_idx][col_idx].nature
+    def is_below_block_of_nature(self, row_idx, col_idx, nature):
+        return row_idx < self.ROWS_NUMBER - 1 and self.grid[row_idx + 1][col_idx].nature == nature
     
-    def is_left_block_same_color(self, row_idx, col_idx):
-        return col_idx > 0 and self.grid[row_idx][col_idx - 1].nature == self.grid[row_idx][col_idx].nature
+    def is_left_block_of_nature(self, row_idx, col_idx, nature):
+        return col_idx > 0 and self.grid[row_idx][col_idx - 1].nature == nature
     
-    def is_right_block_same_color(self, row_idx, col_idx):
-        return col_idx < self.COLS_NUMBER - 1 and self.grid[row_idx][col_idx + 1].nature == self.grid[row_idx][col_idx].nature
+    def is_right_block_of_nature(self, row_idx, col_idx, nature):
+        return col_idx < self.COLS_NUMBER - 1 and self.grid[row_idx][col_idx + 1].nature == nature
     
     def is_search_necessary(self, row_idx, col_idx):
         is_necessary = True
@@ -100,18 +112,55 @@ class Board:
             return 0
                
         chain_length = 1
-        if self.is_below_block_same_color(row_idx, col_idx):
+        if self.is_below_block_of_nature(row_idx, col_idx, self.grid[row_idx][col_idx].nature):
             chain_length += self.search_chain_length(row_idx + 1, col_idx)
-        if self.is_above_block_same_color(row_idx, col_idx):
+        if self.is_above_block_of_nature(row_idx, col_idx, self.grid[row_idx][col_idx].nature):
             chain_length += self.search_chain_length(row_idx - 1, col_idx)
-        if self.is_left_block_same_color(row_idx, col_idx):
+        if self.is_left_block_of_nature(row_idx, col_idx, self.grid[row_idx][col_idx].nature):
             chain_length += self.search_chain_length(row_idx, col_idx - 1)
-        if self.is_right_block_same_color(row_idx, col_idx):
+        if self.is_right_block_of_nature(row_idx, col_idx, self.grid[row_idx][col_idx].nature):
             chain_length += self.search_chain_length(row_idx, col_idx + 1)
 
         return chain_length
-
+    
+    def remove_check_marks(self):
+        for row_idx in range(self.ROWS_NUMBER):
+            for col_idx in range(self.COLS_NUMBER):
+                self.grid[row_idx][col_idx].uncheck()
+    
+    def is_unchecked(self):
+        for row_idx in range(self.ROWS_NUMBER):
+            for col_idx in range(self.COLS_NUMBER):
+                if self.grid[row_idx][col_idx].is_checked:
+                    return False
+        return True
         
+    def remove_chain(self, row_idx, col_idx):
+        chain_nature = self.grid[row_idx][col_idx].nature
+        self.grid[row_idx][col_idx].nature = BlockNature.EMPTY
+        remove_count = 1
+        
+        if self.is_below_block_of_nature(row_idx, col_idx, chain_nature):
+            remove_count += self.remove_chain(row_idx + 1, col_idx)
+        elif self.is_below_block_of_nature(row_idx, col_idx, BlockNature.SKULL):
+            self.grid[row_idx + 1][col_idx].nature = BlockNature.EMPTY
+        
+        if self.is_above_block_of_nature(row_idx, col_idx, chain_nature):
+            remove_count += self.remove_chain(row_idx - 1, col_idx)
+        elif self.is_above_block_of_nature(row_idx, col_idx, BlockNature.SKULL):
+            self.grid[row_idx - 1][col_idx].nature = BlockNature.EMPTY
+        
+        if self.is_left_block_of_nature(row_idx, col_idx, chain_nature):
+            remove_count += self.remove_chain(row_idx, col_idx - 1)
+        elif self.is_left_block_of_nature(row_idx, col_idx, BlockNature.SKULL):
+            self.grid[row_idx][col_idx - 1].nature = BlockNature.EMPTY
+        
+        if self.is_right_block_of_nature(row_idx, col_idx, chain_nature):
+            remove_count += self.remove_chain(row_idx, col_idx + 1)
+        elif self.is_right_block_of_nature(row_idx, col_idx, BlockNature.SKULL):
+            self.grid[row_idx][col_idx + 1].nature = BlockNature.EMPTY
+        
+        return remove_count
 
 
 
